@@ -86,11 +86,16 @@ The method should do all the validations as stated in rule 1.
 4. If all verification is successful, update the turn information on the page. (See the source code and image). And set the started flag to true.(this will help you track at any instant if the game is in start state or not.)
 5. Once game has started, Handle multiple clicks on begin play.
 */
-function set_turn(x){
+function turn_for(x){
 	var turnInfo = document.getElementById('turn_info')
 	if(x==null){
 		turnInfo.innerHTML = 'Game has been reset'
 	}else{
+		if(turn % 2 == 0){
+			x = 'O'
+		}else{
+			x = 'X'
+		}
 		turnInfo.innerHTML = 'Turn for <strong>' + x + '</strong>'
 	}
 }
@@ -100,7 +105,7 @@ function begin_play(){
 		var player1 = document.getElementById('player1_id')
 		var player2 = document.getElementById('player2_id')
 		if (isEmpty(player1.value) || isEmpty(player2.value)){
-			console.log('one or more fields is empty')
+			alert('one or more players names is empty')
 		}else{
 			this.started = true
 
@@ -110,7 +115,7 @@ function begin_play(){
 			player1.value = player1.value + ' (X)'
 			player2.value = player2.value + ' (O)'
 
-			set_turn('X')
+			turn_for(1)
 		}
 	}else{
 		alert('Aready started! Reset Play to start again.')
@@ -138,7 +143,8 @@ function reset_play(){
 	player1.value = ''
 	player2.value = ''
 	moveBox.value = ''
-	set_turn(null)
+	turn_for(null)
+	turn = 1
 
 	var board = document.getElementsByTagName('td')
 	for(var i = 0; i < board.length; i++){
@@ -176,15 +182,57 @@ function cellIsEmpty(loc){
 	}
 }
 
-function placeMarker(loc,x){
+function placeMarker(loc){
 	var board = document.getElementsByTagName('td')
+	var mark;
+	if(turn % 2 == 0){
+		mark = 'O'
+	}else{
+		mark = 'X'
+	}
 	for(var i = 0; i < board.length; i++){
 		if (table_ids[i] == loc){
-			board[i].innerHTML = x
+			board[i].innerHTML = mark
 			board_state[i] = turn % 2
 			return
 		}
 	}
+}
+
+var winningCombos = [
+	[0, 1, 2],
+	[3, 4, 5],
+	[6, 7, 8],
+	[0, 3, 6],
+	[1, 4, 7],
+	[2, 5, 8],
+	[0, 4, 8],
+	[2, 4, 6]
+]
+function checkwin(){
+	for(var i=0; i<winningCombos.length; i++){
+		console.log('combo:' + i + ' = ' + winningCombos[i])
+		var j = 0
+		var mode = board_state[winningCombos[i][j]]
+		if(mode >= 0){
+			j++
+			while(j < winningCombos[i].length){
+				if(mode == board_state[winningCombos[i][j]]){
+					j++
+				}else{
+					break
+				}
+			}
+			if(j == winningCombos[i].length){
+				if(turn%2 == 0){
+					return 'Player 2 (O) Wins'
+				}else{
+					return 'Player 1 (X) Wins'
+				}
+			}
+		}
+	}
+	return false
 }
 
 function play() {
@@ -192,15 +240,15 @@ function play() {
 		move = document.getElementById('move_text_id')
 		if (move.value.match(/[A-C][1-3]/g)){
 			if (cellIsEmpty(move.value)){
-				if(turn % 2 == 0){
-					placeMarker(move.value, 'O')
-					set_turn('X')
-				}else{
-					placeMarker(move.value, 'X')
-					set_turn('O')
+				console.log('valid move, turn:' + turn)
+				placeMarker(move.value)
+				var winner = checkwin()
+				if (winner){
+					alert(winner)
+					reset_play()
 				}
 				turn++
-				console.log('valid move')
+				turn_for(1)
 			}else{
 				console.log('invalid move, cell is already occupied')
 			}

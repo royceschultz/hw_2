@@ -8,7 +8,7 @@ function display2_2() {
 }
 
 function display2_5() {
-  var myanswer  = "My answer goes here: here is my my dummy answer" // TODO 2.5: Fill in Answer here
+  var myanswer  = "The paragraph and button have style 'display: None' so they will not appear. Children of the paragraph with this style also do not appear. The last <p> tag has no inner html so there is nothing to display." // TODO 2.5: Fill in Answer here
   document.getElementById("25answer").innerHTML = myanswer; // Do not change
 }
 
